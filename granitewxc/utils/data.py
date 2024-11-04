@@ -334,12 +334,12 @@ def get_dataloaders_merra2(config: ExperimentConfig) -> tuple[DataLoader, DataLo
 
 def _get_transforms(config: ExperimentConfig):
 
-    if 'crop_lat' in config.data.__dict__:
+    if 'crop_lat' in config.data.__dict__ and config.data.crop_lat is not None:
         crop_lat = [config.data.crop_lat[0], -config.data.crop_lat[1]]
     else:
         crop_lat = [0, None]
 
-    if 'crop_lon' in config.data.__dict__:
+    if 'crop_lon' in config.data.__dict__ and config.data.crop_lon is not None:
         crop_lon = [config.data.crop_lon[0], -config.data.crop_lon[1]]
     else:
         crop_lon = [0, None]
