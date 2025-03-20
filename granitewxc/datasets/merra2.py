@@ -24,7 +24,8 @@ class Merra2DownscaleDataset(Dataset):
         climatology_path_surface: Optional[str] = None,
         climatology_path_vertical: Optional[str] = None,
         transforms: list[Callable] = [],
-        n_input_timestamps = 1,      
+        n_input_timestamps = 1,
+        **kwargs,
     ):
         """
         Args:
