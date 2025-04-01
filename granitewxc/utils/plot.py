@@ -65,7 +65,7 @@ def plot_model_results(samples, samples_id, title, **kwargs):
     
     return fig
 
-def plot_power_spectrum(img, ax, save_fig=False):
+def plot_power_spectrum(img, ax, label=None, save_fig=False):
     """
     A power spctrum mesaures the strength of features at different resolutions
 
@@ -93,11 +93,13 @@ def plot_power_spectrum(img, ax, save_fig=False):
         bins=kbins
     )
 
-    Abins*= np.pi * (kbins[1:]**2 - kbins[:-1]**2)
+    Abins *= np.pi * (kbins[1:]**2 - kbins[:-1]**2)
 
-    ax.loglog(kvals, Abins)
+    ax.loglog(kvals, Abins, label=label)
     ax.set_xlabel("$k$")
     ax.set_ylabel("$P(k)$")
+    if label:
+        ax.legend()
     plt.tight_layout()
 
     if save_fig:
@@ -109,3 +111,80 @@ def spatial_rmse(y_hat, y):
     
 def spatial_bias(y_hat, y):
     return y_hat.mean() - y.mean()
+
+def plot_residual_and_power_spectrum(residual, target, prediction, **kwargs):
+
+    fig, axes = plt.subplots(1, 2, figsize=(16, 5))
+
+    im_residual = plot_spatial(residual, axes[0], "Residual", **kwargs.get('plot_residual_kwargs', {}))
+    fig.colorbar(im_residual, ax=axes[0], orientation='horizontal', fraction=0.05, aspect=32)
+    
+    plot_power_spectrum(target, ax=axes[1], label='Target')
+    plot_power_spectrum(prediction, ax=axes[1], label='AI Model')
+    
+    axes[1].set_title("Power Spectrum")
+    axes[1].legend(['Target', 'AI Model'], fontsize=12)
+    axes[1].set_xlabel("Frequency")
+    axes[1].set_ylabel("Power")
+    axes[1].tick_params(labelsize=8)
+    
+    plt.show()
+
+def plot_sample(data):
+
+    x = data['x']
+    y = data['y']
+
+    num_rows, num_cols = 2, 2
+    fig, axs = plt.subplots(num_rows, num_cols, figsize=(6, 6))
+    
+    # flatten the axes for easy iteration
+    axs = np.ravel(axs)
+    
+    images = [
+        axs[0].imshow(x[0, 1, :, :], cmap='coolwarm'), axs[1].imshow(y[0, 0, :, :], cmap='coolwarm'), 
+        axs[2].imshow(x[0, 2, :, :], cmap='coolwarm'), axs[3].imshow(y[0, 1, :, :], cmap='coolwarm')
+    ]
+    
+    titles = ["GDPS - UUVE", "HRDPS - UUVE", "GDPS - VVSN", "HRDPS - VVSN"]
+    for ax, title in zip(axs, titles):
+        ax.tick_params(labelsize=8)
+        ax.set_title(title, fontsize=14, pad=10)
+    
+    plt.tight_layout(rect=[0, 0, 0.9, 1])  
+    
+    # colorbar
+    for i in range(num_rows):
+        cbar_ax = fig.add_axes([0.92, [0.56, 0.073][i], 0.02, 0.35])
+        fig.colorbar(axs[i * num_cols].images[0], cax=cbar_ax, orientation='vertical', label=["UUVE [m/s]", "VVSN [m/s]"][i])
+
+    plt.show()
+
+def plot_loss(train_loss, val_loss):
+    
+    plt.figure(figsize=(7, 4)) 
+    plt.plot(train_loss, label='Training Loss', color='blue', linestyle='-', linewidth=1)
+    plt.plot(val_loss, label='Validation Loss', color='orange', linestyle='-', linewidth=1)
+
+    plt.title('Training and Validation Loss', fontsize=13)
+    plt.xlabel('Epochs', fontsize=12)
+    plt.ylabel('Loss', fontsize=12)
+
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.legend(fontsize=10)
+    plt.show()
+
+def plot_eccc_results(samples, samples_id, title, cbar_title, **kwargs):
+    
+    fig, axes = plt.subplots(1, len(samples), figsize=(18, 4))
+    plt.suptitle(title, fontsize=15)
+    
+    for i, ax in enumerate(axes):
+        im = plot_spatial(samples[i], ax, samples_id[i], **kwargs)
+    
+    cbar_ax = fig.add_axes([0.2, 0.05, 0.6, 0.05])  # [left, bottom, width, height]
+    cbar = fig.colorbar(im, cax=cbar_ax, orientation='horizontal') 
+    cbar.set_label(cbar_title)  
+    cbar.ax.tick_params()  
+
+    plt.show()
