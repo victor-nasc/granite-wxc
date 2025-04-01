@@ -6,27 +6,15 @@ from typing import Optional
 
 from granitewxc.utils import distributed
 from granitewxc.utils.config import ExperimentConfig
+from granitewxc.models.finetune_model import FinetuneWrapper
 
 
-class FinetuneWrapper(torch.nn.Module):
+class ClimateECCCFinetuneWrapper(FinetuneWrapper):
     """ General purpose wrapper class to finetune using us configurable head and backbone """
 
     def __init__(self, backbone: torch.nn.Module, head: torch.nn.Module):
-        super().__init__()
+        super().__init__(backbone, head)
 
-        self.backbone = backbone  # pre-trained model
-        self.head = head  # task specific head
-
-    def forward(self, batch):
-        """
-        Args:
-            batch: dependent on the backbone
-        Returns:
-            output of the configured head
-        """
-        raise NotImplementedError('Forward for wrapper has not been implemented.')
-    
-    
     def load_pretrained_backbone(
             self, 
             weights_path: str,
@@ -78,38 +66,12 @@ class FinetuneWrapper(torch.nn.Module):
         else:
             return
 
-    def ignore_patch_embed(self, checkpoint, ignore_modules: Optional[list[str]] = None):
-        """ Specifies PrithviWxC patch embedding layers and removes them from model checkpoint. """
-        ignore_modules = [] if ignore_modules is None else ignore_modules
-        ignore_layers = []
-        for layer in checkpoint:
-            if any(module in layer for module in ignore_modules):
-                ignore_layers.append(layer)
-
-        for layer in ignore_layers:
-            checkpoint.pop(layer)
-
-        return checkpoint, ignore_layers
-
-    def freeze_unused_parameters(self, unused_parameters: list):
-        for name, param in self.backbone.named_parameters():        
-            if any(unused in name for unused in unused_parameters):
-                param.requires_grad = False 
-
-    def freeze_model(self, model: torch.nn.Module, ignore_layers: Optional[list] = None):
-        """ Freeze given model for all layers expect the ones specified in ignore_layers. """
-        ignore_layers = [] if ignore_layers is None else ignore_layers
-        for name, param in model.named_parameters():        
-            if name not in (ignore_layers):
-                param.requires_grad = False
-
-
 
 
 #-----------------------------------------------------
 # UNET for static covariates
 #-----------------------------------------------------
-class ClimateDownscaleFinetuneUNETModel(FinetuneWrapper):
+class ClimateDownscaleFinetuneUNETModel(ClimateECCCFinetuneWrapper):
 
     def __init__(
             self,
@@ -430,7 +392,7 @@ class ClimateDownscaleFinetuneUNETModel(FinetuneWrapper):
         return x_out
 
 
-class ClimateDownscaleFinetuneModel(FinetuneWrapper):
+class ClimateDownscaleFinetuneModel(ClimateECCCFinetuneWrapper):
 
     def __init__(
             self,
