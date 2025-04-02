@@ -239,7 +239,7 @@ class EcccHrdpsGdpsDataset(Dataset):
             static_ds_xr = xr.open_dataset(self.static_data_repo[static_key], engine='h5netcdf')
             
         else:
-            xr_ds = xr.open_dataset(self.data_index_repo[str(id_key)][index]).isel(time=0)
+            xr_ds = xr.open_dataset(self.data_index_repo[str(id_key)][index], decode_timedelta=False).isel(time=0)
             static_ds_xr = xr.open_dataset(self.static_data_repo[static_key])
         
         # delete unnecesary variables
