@@ -29,7 +29,7 @@ This repository contains code and examples to apply the [Prithvi WxC foundation 
 3. Run the notebooks in the examples directory
    - [MERRA2 example](examples/merra2_downscaling/notebooks/merra2_downscaling_inference.ipynb):
       This notebook will download model weights as well as sample data for basic illustration from [Hugging Face](https://huggingface.co/ibm-granite/granite-geospatial-wxc-downscaling).
-   - [ECCC example](examples/eccc_downscaling/notebooks/):
+   - [ECCC example](examples/eccc_downscaling/):
          This directory contains notebooks for both fine-tuning and inference. It also includes instructions on setting up the data and configuration files.
 
 ## Fine-tuned model
