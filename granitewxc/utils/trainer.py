@@ -282,3 +282,53 @@ def save_checkpoint(config: dict,
     print(f"--> saved {checkpoint_file}")
     
 
+def train_model(config, model, train_dl, val_dl, optimizer, scheduler, scaler, local_rank, use_gpu, save_every, loss_func):
+    train_loss = []
+    val_loss = []
+
+    for epoch in range(config.num_epochs):  
+        torch.distributed.barrier()
+
+        print(f"Learning rate: {scheduler.get_last_lr()[0]}")
+        print(f"Rank {local_rank} starting epoch {epoch + 1}...")
+
+        curr_train_loss, _ = train_one_epoch(
+            model=model,
+            local_rank=local_rank,
+            train_loader=train_dl,
+            optimizer=optimizer,
+            loss_func=loss_func,
+            epoch=epoch,
+            scaler=scaler,
+            scheduler=scheduler,
+            gpu=use_gpu,
+            limit_steps=config.limit_steps_train,
+            num_epochs=config.num_epochs,
+        )
+
+        curr_val_loss, _ = validate_one_epoch(
+            model=model,
+            local_rank=local_rank,
+            validation_loader=val_dl,
+            loss_func=loss_func,
+            epoch=epoch,
+            gpu=use_gpu,
+            limit_steps=config.limit_steps_valid,
+        )
+
+        train_loss.append(curr_train_loss.tolist())
+        val_loss.append(curr_val_loss.tolist())
+
+        if (epoch + 1) % 5 == 0:
+            save_checkpoint(
+                config=config,
+                scheduler=scheduler,
+                epoch=epoch,
+                model=model,
+                optimizer=optimizer,
+                train_loss=train_loss,
+                curr_val_loss=curr_val_loss,
+            )
+        
+
+    return train_loss, val_loss
