@@ -1,9 +1,17 @@
 # granite-wxc
 
-This repository contains code and examples to apply the [Prithvi WxC foundation model](https://github.com/NASA-IMPACT/Prithvi-WxC) to downscaling tasks. In particular, the repository contains both code and instructions for generic fine-tuning tasks as well as fine-tuned models for MERRA2 2m temperature data as reference.
+This repository contains code and examples to apply the [Prithvi WxC foundation model](https://github.com/NASA-IMPACT/Prithvi-WxC) to downscaling tasks. In particular, the repository contains both code and instructions for generic fine-tuning tasks as well as fine-tuned models for MERRA2 2m temperature and the ECCC v10 and u10 wind components as reference.
 
 <p align="center">
-<img src="downscaling_T2M_coolwarm_animated.gif" alt="6x downscaling of MERRA-2 2m temperature" width="60%"/>
+   <img src="downscaling_T2M_coolwarm_animated.gif" alt="6x downscaling of MERRA-2 2m temperature" width="60%"/>
+   <br><em>Figure 1: 6x downscaling of MERRA-2 2m temperature</em>
+</p>
+
+</br>
+
+<p align="center">
+   <img src="downscaling_eccc_u10.png" alt="8x downscaling of ECCC's u10 wind" width="60%"/>
+   <br><em>Figure 2: 8x downscaling of ECCC's u10 wind component</em>
 </p>
 
 ## Getting started
@@ -18,9 +26,11 @@ This repository contains code and examples to apply the [Prithvi WxC foundation 
    cd ../granite-wxc
    pip install '.[examples]'
    ```
-3. Run the [notebook in the examples directory](examples/granitewxc_downscaling/notebooks/granitewxc_downscaling_inference.ipynb).
-
-   This notebook will download model weights as well as sample data for basic illustration from [Hugging Face](https://huggingface.co/ibm-granite/granite-geospatial-wxc-downscaling).
+3. Run the notebooks in the examples directory
+   - [MERRA2 example](examples/merra2_downscaling/notebooks/merra2_downscaling_inference.ipynb):
+      This notebook will download model weights as well as sample data for basic illustration from [Hugging Face](https://huggingface.co/ibm-granite/granite-geospatial-wxc-downscaling).
+   - [ECCC example](examples/eccc_downscaling/notebooks/):
+         This directory contains notebooks for both fine-tuning and inference. It also includes instructions on setting up the data and configuration files.
 
 ## Fine-tuned model
 
