@@ -18,6 +18,8 @@ authors = [
     {name = "Daniel Salles Civitarese"},
     {name = "Johannes Jakubik"},  
     {name = "Romeo Kienzler"},  
+    {name = "Victor Nascimento Ribeiro"},
+    {name = "Jorge Luis Guevara Diaz"},
 ]
 classifiers = [
 ]
