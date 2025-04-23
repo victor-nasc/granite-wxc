@@ -2,9 +2,13 @@
 
 You can download the HRDPS and GDPS datasets, which correspond to high-resolution and low-resolution data respectively, from the following links:
 
-HRDPS (High-Resolution Deterministic Prediction System): [Download Here](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/hrdps/)
+- HRDPS (High-Resolution Deterministic Prediction System): [Download Here](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/hrdps/)
 
-GDPS (Global Deterministic Prediction System): [Download Here](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/gdps_regridded/)
+- GDPS (Global Deterministic Prediction System): [Download Here](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/gdps_regridded/)
+
+- Static Data: [Download Here](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/geophy.nc)
+
+Obs.: Note that the geophysical fields in the static data are slightly larger than those in the HRDPS data, so you will need to perform appropriate cropping to match the files
 
 ## Setup data indexes
 
@@ -17,13 +21,15 @@ The data is organized in `JSON` files, mapping unique indices (as string keys) t
 }
 ````
 
-Each entry represents a paired dataset where the GDPS and HRDPS files correspond to the same timestamp and region. The data files are stored in **NetCDF** format (`.nc`)
+Each entry represents a paired dataset where the GDPS and HRDPS files correspond to the same timestamp and region. The data files are stored in **NetCDF** format (`.nc`). 
 
 We provide an [index generator](index_generator.py) to help you generate your JSON index file automatically
 
 ```bash
 python3 index_generator.py --gdps_paths <GDPS> --hrdps_paths <HRDPS> --output <OUTPUT>
 ```
+
+The static data should have an index file as well
 
 Additionally, we provide a [scalar generator](compute_scalars.py), which is used for normalizing the data before feeding it into the model
 
