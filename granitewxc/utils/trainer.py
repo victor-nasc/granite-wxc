@@ -263,7 +263,7 @@ def save_checkpoint(config: dict,
                     scheduler: torch.optim.lr_scheduler._LRScheduler = None):
     
     checkpoint_name = f'checkpoint_{epoch}.pt'
-    checkpoint_file = os.path.join(config.path_experiment, 'pretrained', checkpoint_name)
+    checkpoint_file = os.path.join(config.path_experiment, 'weights', checkpoint_name)
     
     os.makedirs(os.path.dirname(checkpoint_file), exist_ok=True) 
     
