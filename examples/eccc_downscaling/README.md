@@ -99,7 +99,7 @@ Each entry represents a paired dataset where the GDPS and HRDPS files correspond
 We provide an [index generator](index_generator.py) to help you generate your JSON index file automatically
 
 ```bash
-python3 index_generator.py --gdps_paths <GDPS> --hrdps_paths <HRDPS> --output <OUTPUT>
+python3 index_generator.py --gdps_paths <GDPS folder> --hrdps_paths <HRDPS folder> --output <OUTPUT folder>
 ```
 
 The static data should have an index file as well
