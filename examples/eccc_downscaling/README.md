@@ -63,7 +63,7 @@ On [Hugging Face](https://huggingface.co/victornasc/granite-geospatial-eccc-down
 The map projection of the GDPS outputs is a Yin-Yang grid with a different rotated latitude-longitude map projection than the one of the HRDPS grid. To align the grids, we project the GDPS grid to the HRDPS grid using nearest neighbor interpolation. The interpolated data is then reduced by a factor of 8 (20-km nominal resolution) as the input of the AI downscaling method.
 
 <p align="center">
-   <img src=regrid.png alt="ECCC data regridding" width="70%"/>
+   <img src=regrid.png alt="ECCC data regridding" width="75%"/>
    <br><em>
       Figure 1: Example of zonal and meridional winds on the GDPS and HRDPS grids<br>
       Note that the GDPS grid was cropped over North America<br>
