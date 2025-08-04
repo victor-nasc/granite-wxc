@@ -1,3 +1,9 @@
+This notebook demonstrates the downscaling task using the Prithvi Weather Foundation Model, applied to data from Canada’s operational Numerical Weather Prediction (NWP) systems. Specifically, we downscale from the Global Deterministic Prediction System (GDPS)—ECCC’s operational long-range forecast model that produces 10-day forecasts at ~15 km resolution—to the domain of the High-Resolution Deterministic Prediction System (HRDPS), a short-term forecast system that generates 48-hour forecasts at ~2.5 km resolution.
+
+For more details on this dataset, see our preliminary work using GANs: arxiv.org/pdf/2412.06958.
+
+The Notebooks `eccc_downscaling_finetune` and `eccc_downscaling_inference` and Inference, uses a single sample pair (GDPS, HRDPS) as an example to demonstrate data preprocessing, training, and inference. However, we also provide links to the full dataset and share the training/validation/test splits so you can start training your own models.
+
 # Getting started
 
 You can download all the essential files to run the examples via our [Hugging Face](https://huggingface.co/victornasc/granite-geospatial-eccc-downscaling) repository
