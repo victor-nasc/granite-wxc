@@ -76,7 +76,7 @@ We provide:
 - **Sample data**: One preprocessed GDPS-HRDPS pair for demonstration.
 - **Scalars**: Precomputed normalization statistics.
 - **Indices**: JSON files mapping file paths for input/target data pairs.
-- **Pretrained weights**: Best-performing model checkpoints.
+- **Pretrained weights**: A model checkpoints.
 
 ## Clone the Repository
 
@@ -84,7 +84,8 @@ We provide:
 git clone https://huggingface.co/victornasc/granite-geospatial-eccc-downscaling ./experiments
 ```
 
-Once cloned, you can run the example notebooks. If you want to use the full dataset, continue with the instructions below.
+Once cloned, you can run the example notebooks. 
+The next section shows the case of using the full dataset.
 
 ---
 
@@ -108,7 +109,7 @@ Use `preprocess.py` to interpolate GDPS onto the HRDPS grid using nearest-neighb
 *Figure 1: Example of zonal and meridional winds on GDPS and HRDPS grids. HRDPS domain is shown by a black rectangle.*
 
 
-> Once regridding is complete, the GDPS data matches the HRDPS resolution. The Dataset class then handles downsampling automatically—see the implementation in [eccc.py](https://github.com/victor-nasc/granite-wxc/blob/main/granitewxc/datasets/eccc.py)
+> ***Obs***: Once regridding is complete, the GDPS data matches the HRDPS resolution. The Dataset class then handles downsampling automatically by a factor of eight, see the implementation in [eccc.py](https://github.com/victor-nasc/granite-wxc/blob/main/granitewxc/datasets/eccc.py)
 
 
 ---
@@ -150,6 +151,6 @@ python3 compute_scalars.py --config_path <CONFIG> --save_dir <DIR>
 ---
 ### Training
 
-To train with your own dataset, refer to `eccc_downscaling_finetune.ipynb` for an example setup. You will likely need to adapt the code into your own training script to scale beyond the example.
+To train with your own dataset, refer to `eccc_downscaling_finetune.ipynb` for an example setup. You will likely need to adapt the code into your own training script to train beyond the example.
 
 
