@@ -1,119 +1,155 @@
-This notebook demonstrates the downscaling task using the Prithvi Weather Foundation Model, applied to data from Canada’s operational Numerical Weather Prediction (NWP) systems. Specifically, we downscale from the Global Deterministic Prediction System (GDPS)—ECCC’s operational long-range forecast model that produces 10-day forecasts at ~15 km resolution—to the domain of the High-Resolution Deterministic Prediction System (HRDPS), a short-term forecast system that generates 48-hour forecasts at ~2.5 km resolution.
+# Getting Started
 
-For more details on this dataset, see our preliminary work using GANs:[link](arxiv.org/pdf/2412.06958)
+This repository includes two example notebooks located in the `notebooks` folder:
 
-The Notebooks `eccc_downscaling_finetune` and `eccc_downscaling_inference` and Inference, uses a single sample pair (GDPS, HRDPS) as an example to demonstrate data preprocessing, training, and inference. However, we also provide links to the full dataset and share the training/validation/test splits so you can start training your own models.
+- `eccc_downscaling_finetune.ipynb`
+- `eccc_downscaling_inference.ipynb`
 
-# Getting started
+These notebooks demonstrate how to use the **Prithvi Weather Foundation Model** for a downscaling task on Canada’s operational Numerical Weather Prediction (NWP) systems. Specifically, the goal is to downscale forecasts from the **Global Deterministic Prediction System (GDPS)**—which provides 10-day forecasts at ~15 km resolution—to the **High-Resolution Deterministic Prediction System (HRDPS)**, which produces 48-hour forecasts at ~2.5 km resolution.
 
-You can download all the essential files to run the examples via our [Hugging Face](https://huggingface.co/victornasc/granite-geospatial-eccc-downscaling) repository
+For more information about the dataset, see our preliminary work using GANs: [arxiv.org/pdf/2412.06958](https://arxiv.org/pdf/2412.06958)
 
-We provide the following:
-- <ins>Configuration files</ins>: `YAML` files containing settings related to the model, data, file paths, and more
-- <ins>Data sample</ins>: This example uses only one preprocessed data sample. If you'd like to train with more data, see the section below
-- <ins>Scalars</ins>: These files contain the mean and standard deviation statistics used to normalize the data before feeding it to the model
-- <ins>Indices</ins>: Data is organized in `JSON` files mapping unique string indices to pairs of file paths (low resolution, high resolution). The Dataset class uses these indices to match the files correctly
-- <ins>Pretrained weights</ins>: These are our best checkpoints from training using the ECCC data
+The notebooks walk through the full pipeline using a single GDPS-HRDPS data pair, covering preprocessing, training, and inference. We also provide links to the full dataset and configuration files so you can run your own experiments.
 
-To reproduce the outputs shown in the example notebooks, download the required files and run the notebooks
+---
+
+# Dataset Description
+
+### GDPS Inputs
+
+| Variable         | Description                                                  | Units |
+|------------------|--------------------------------------------------------------|--------|
+| U<sub>surf</sub> | Zonal wind at surface (10 m)                                 | m/s    |
+| V<sub>surf</sub> | Meridional wind at surface (10 m)                            | m/s    |
+| T<sub>surf</sub> | Air temperature at surface (1.5 m)                           | °C     |
+| T<sub>546</sub>  | Air temperature at 546 hPa (interpolated)                    | °C     |
+| U<sub>546</sub>  | Zonal wind at 546 hPa                                        | m/s    |
+| V<sub>546</sub>  | Meridional wind at 546 hPa                                   | m/s    |
+| W<sub>546</sub>  | Vertical motion at 546 hPa (interpolated)                    | Pa/s   |
+
+### HRDPS Targets
+
+| Variable | Description                        | Units |
+|----------|------------------------------------|--------|
+| u10      | Zonal wind at surface (10 m)       | m/s    |
+| v10      | Meridional wind at surface (10 m)  | m/s    |
+
+### HRDPS Static Covariates
+
+| Variable | Description        | Units     |
+|----------|--------------------|-----------|
+| me       | Orography          | m         |
+| mg       | Water/land mask    | fraction  |
+| z0       | Surface roughness  | m         |
+
+---
+
+# The Task
+
+The objective is to downscale GDPS outputs by a factor of 8 to match the spatial resolution of HRDPS using the **Prithvi Weather Foundation Model**. The following data pipeline is used for preprocessing.
+
+---
+
+## Data Pipeline
+
+- **Regridding**: GDPS and HRDPS are provided in different rotated coordinate systems. We regrid GDPS to match the HRDPS grid using nearest-neighbor interpolation.
+- **Downsampling**: The regridded GDPS is downsampled by a factor of 8 to approximate a 20 km spatial resolution.
+- **Scaler Computation**: Compute normalization scalers (mean and standard deviation) from the training partition.
+- **Data Sampling**: Each GDPS-HRDPS pair is large (~1.5 GB), so we sample random spatial crops to form an intermediate dataset for training.
+- **Static Covariates**: Static features (e.g., orography, roughness) are used to aid model learning.
+
+---
+
+## Model
+
+We use a UNet architecture, integrating the **Prithvi encoder** as a deep feature extractor.
+
+---
+
+# Running Training and Inference
+
+You can download all required files from our [Hugging Face repository](https://huggingface.co/victornasc/granite-geospatial-eccc-downscaling).
+
+We provide:
+
+- **Configuration files**: YAML files containing experiment settings.
+- **Sample data**: One preprocessed GDPS-HRDPS pair for demonstration.
+- **Scalars**: Precomputed normalization statistics.
+- **Indices**: JSON files mapping file paths for input/target data pairs.
+- **Pretrained weights**: Best-performing model checkpoints.
+
+## Clone the Repository
 
 ```bash
 git clone https://huggingface.co/victornasc/granite-geospatial-eccc-downscaling ./experiments
 ```
 
-# Finetuning with the full dataset 
+Once cloned, you can run the example notebooks. If you want to use the full dataset, continue with the instructions below.
 
-### Downloading
+---
 
-On [Hugging Face](https://huggingface.co/victornasc/granite-geospatial-eccc-downscaling), we provide only a sample of the data. You can download the remaining HRDPS and GDPS  datasets from the following links:
+# Using the Full Dataset
 
-- HRDPS (High-Resolution Deterministic Prediction System): [Download Here](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/hrdps/)
+The Hugging Face repository includes only a sample. Download the full datasets from the following links:
 
-- GDPS (Global Deterministic Prediction System): [Download Here](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/gdps_regridded/)
+- **HRDPS**: [Download](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/hrdps/)
+- **GDPS**: [Download](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/gdps_regridded/)
+- **Static data**: [Download](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/geophy.nc)
 
-- Static Data: [Download Here](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/geophy.nc)
+Before training, you must regrid the GDPS data to match the HRDPS domain.
 
-<div align="center">
-  
-### GDPS Predictors
+---
 
-| Variable    | Description                                                                                     | Units   |
-|-------------|-------------------------------------------------------------------------------------------------|---------|
-| U<sub>surf</sub>  | True geographical West-East (zonal) component of the horizontal wind at the surface (10 m)     | [m/s]   |
-| V<sub>surf</sub>  | True geographical South-North (meridional) component of the horizontal wind at the surface (10 m) | [m/s]   |
-| T<sub>surf</sub>  | Air temperature at the surface (1.5 m)                                                        | [°C]    |
-| T<sub>546</sub>   | Air temperature vertically interpolated at 546 hPa                                            | [°C]    |
-| U<sub>546</sub>   | True geographical West-East (zonal) component of the horizontal wind at 546 hPa               | [m/s]   |
-| V<sub>546</sub>   | True geographical South-North (meridional) component of the horizontal wind at 546 hPa        | [m/s]   |
-| W<sub>546</sub>   | Vertical motion vertically interpolated at 546 hPa                                            | [Pa/s]  |
+### Data Preprocessing
 
-### HRDPS Predictands
+Use `preprocess.py` to interpolate GDPS onto the HRDPS grid using nearest-neighbor interpolation. The regridded data is then downsampled by a factor of 8.
 
-| Variable | Description                                                                                   | Units |
-|----------|-----------------------------------------------------------------------------------------------|--------|
-| u10      | True geographical West-East (zonal) component of the horizontal wind at the surface (10 m)   | [m/s]  |
-| v10      | True geographical South-North (meridional) component of the horizontal wind at the surface (10 m) | [m/s]  |
+![Regridding](regrid.png)
+*Figure 1: Example of zonal and meridional winds on GDPS and HRDPS grids. HRDPS domain is shown by a black rectangle.*
 
-### HRDPS Static Covariates
 
-| Variable | Description              | Units       |
-|----------|--------------------------|-------------|
-| me       | Model orography          | [m]         |
-| mg       | Water/land mask          | [fraction]  |
-| z0       | Roughness length         | [m]         |
+> Once regridding is complete, the GDPS data matches the HRDPS resolution. The Dataset class then handles downsampling automatically—see the implementation in [eccc.py](https://github.com/victor-nasc/granite-wxc/blob/main/granitewxc/datasets/eccc.py)
 
-</div>
 
-### Data preprocessing 
+---
 
-The map projection of the GDPS outputs is a Yin-Yang grid with a different rotated latitude-longitude map projection than the one of the HRDPS grid. To align the grids, we project the GDPS grid to the HRDPS grid using nearest neighbor interpolation. The interpolated data is then reduced by a factor of 8 (20-km nominal resolution) as the input of the AI downscaling method.
+### Index Files
 
-<p align="center">
-   <img src=regrid.png alt="ECCC data regridding" width="75%"/>
-   <br><em>
-      Figure 1: Example of zonal and meridional winds on the GDPS and HRDPS grids<br>
-      Note that the GDPS grid was cropped over North America<br>
-      The domain of HRDPS grid is indicated by a black rectangle
-   </em>
-</p>
+You must define index files in JSON format for both input and static data.
 
-We provide the `preprocess.py` script to make the reggridding. Make sure that the HRDPS has exactly 8× the spatial resolution of the GDPS. You may need to crop additional rows and columns to ensure this alignment
+**Data Pair Indices:**
 
-### Scalars 
-We provide a [scalar generator](compute_scalars.py) script to compute the statistics used for normalizing the data before feeding it into the model
+```json
+{
+  "0": ["<GDPS_file.nc>", "<HRDPS_file.nc>"],
+  "1": ["<GDPS_file.nc>", "<HRDPS_file.nc>"]
+}
+```
+
+**Static Covariate Indices:**
+
+```json
+{
+  "static_regridded_gdps": "<Static_GDPS_file.nc>",
+  "static_hrdps": "<Static_HRDPS_file.nc>"
+}
+```
+
+---
+
+### Scaler Computation
+
+Compute normalization statistics with:
 
 ```bash
 python3 compute_scalars.py --config_path <CONFIG> --save_dir <DIR>
 ```
 
-**Important:** These statistics should be computed exclusively using your **training data**!
+> **Note:** These statistics should be computed using only the training data.
 
-### Data indexes
+---
+### Training
 
-The data is organized in `JSON` files, mapping unique indices (as string keys) to pairs of file paths. Each index key points to an array containing two strings:
+To train with your own dataset, refer to `eccc_downscaling_finetune.ipynb` for an example setup. You will likely need to adapt the code into your own training script to scale beyond the example.
 
-````
-{
-  "0": ["<GDPS data file>", "<HRDPS data file>"],
-  "1": ["<GDPS data file>", "<HRDPS data file>"],
-  ...
-}
-````
 
-Each entry represents a paired dataset where the GDPS and HRDPS files correspond to the same timestamp and region
-
-We provide an [index generator](index_generator.py) to help you generate your JSON index file automatically
-
-```bash
-python3 index_generator.py --gdps_paths <GDPS folder> --hrdps_paths <HRDPS folder> --output <OUTPUT folder>
-```
-
-The static data should have an index file as well
-
-````
-{
-  "static_regridded_gdps": "<Static GDPS file>", "static_hrdps": "<Static HRDPS file>"
-}
-````
-
-After setting up all the necessary requirements for your additional data, you should be able to run training and inference
