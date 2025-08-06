@@ -78,10 +78,28 @@ We provide:
 - **Indices**: JSON files mapping file paths for input/target data pairs.
 - **Pretrained weights**: A model checkpoints.
 
-## Clone the Repository
+# Step-by-step guide to setup the enviroment for running the notebooks
+## Clone this repository and the Pritvhi weather foundation model:
+```bash
+git clone https://github.com/NASA-IMPACT/Prithvi-WxC
+git clone https://github.com/IBM/granite-wxc.git
+cd Prithvi-WxC
+pip install '.[examples]'
+cd ../granite-wxc
+pip install '.[examples]'
+```
+## Clone Hugging Face Repository
 
 ```bash
+cd granite-wxc/
 git clone https://huggingface.co/ibm-granite/granite-geospatial-wxc-downscaling
+```
+
+## Setup Virtual Enviroment
+Using uv
+```bash
+uv venv  .venv
+source .venv/bin/activate
 ```
 
 Once cloned, you can run the example notebooks. 
