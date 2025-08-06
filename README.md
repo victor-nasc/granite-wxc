@@ -3,14 +3,14 @@
 This repository contains code and examples to apply the [Prithvi WxC foundation model](https://github.com/NASA-IMPACT/Prithvi-WxC) to downscaling tasks. In particular, the repository contains both code and instructions for generic fine-tuning tasks as well as fine-tuned models for MERRA2 2m temperature and the ECCC v10 and u10 wind components as reference.
 
 <p align="center">
-   <img src="downscaling_T2M_coolwarm_animated.gif" alt="6x downscaling of MERRA-2 2m temperature" width="60%"/>
+   <img src="downscaling_T2M_coolwarm_animated.gif" alt="6x downscaling of MERRA-2 2m temperature" width="70%"/>
    <br><em>Figure 1: 6x downscaling of MERRA-2 2m temperature</em>
 </p>
 
 </br>
 
 <p align="center">
-   <img src="downscaling_eccc_u10.png" alt="8x downscaling of ECCC's u10 wind" width="60%"/>
+   <img src="downscaling_eccc_u10.png" alt="8x downscaling of ECCC's u10 wind" width="70%"/>
    <br><em>Figure 2: 8x downscaling of ECCC's u10 wind component</em>
 </p>
 
