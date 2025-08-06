@@ -68,7 +68,7 @@ We use a UNet architecture, integrating the **Prithvi encoder** as a deep featur
 
 # Running Training and Inference
 
-You can download all required files from our [Hugging Face repository](https://huggingface.co/victornasc/granite-geospatial-eccc-downscaling).
+You can download all required files from our [Hugging Face repository](https://huggingface.co/ibm-granite/granite-geospatial-wxc-downscaling).
 
 We provide:
 
@@ -81,7 +81,7 @@ We provide:
 ## Clone the Repository
 
 ```bash
-git clone https://huggingface.co/victornasc/granite-geospatial-eccc-downscaling ./experiments
+git clone https://huggingface.co/ibm-granite/granite-geospatial-wxc-downscaling
 ```
 
 Once cloned, you can run the example notebooks. 
