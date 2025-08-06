@@ -66,7 +66,7 @@ We use a UNet architecture, integrating the **Prithvi encoder** as a deep featur
 
 ---
 
-# Running Training and Inference
+##  Files provided for running the example notebooks
 
 You can download all required files from our [Hugging Face repository](https://huggingface.co/ibm-granite/granite-geospatial-wxc-downscaling).
 
