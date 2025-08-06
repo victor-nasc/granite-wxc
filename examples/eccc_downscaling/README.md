@@ -98,18 +98,31 @@ git clone https://huggingface.co/ibm-granite/granite-geospatial-wxc-downscaling
 ## Setup Virtual Enviroment
 Using uv
 ```bash
-uv venv  .venv
+uv venv .venv --python=python3.10
 source .venv/bin/activate
 ```
 
-Once cloned, you can run the example notebooks. 
-The next section shows the case of using the full dataset.
+Using Conda
+```
+conda create -n myenv python=3.10
+```
 
+Using venv
+```
+python3.10 -m venv .venv
+```
+
+
+## Launch Jupyter Lab
+
+```bash
+jupyter lab --no-browser --ip $(hostname -f)
+```
 ---
 
 # Using the Full Dataset
 
-The Hugging Face repository includes only a sample. Download the full datasets from the following links:
+The Hugging Face repository includes only a sample. In case you want to experiment with the full dataset, you can download the datasets from the following links:
 
 - **HRDPS**: [Download](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/hrdps/)
 - **GDPS**: [Download](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/gdps_regridded/)
