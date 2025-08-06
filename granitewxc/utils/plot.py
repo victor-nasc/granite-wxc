@@ -5,6 +5,12 @@ import scipy.stats as stats
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.animation as animation
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+from pysteps.utils.spectral import rapsd
+from granitewxc.utils.eccc_contants import RLAT_GDPS, RLON_GDPS, RLAT_HRDPS, RLON_HRDPS 
+from granitewxc.utils.eccc_contants import GRID_NORTH_POLE_LATITUDE, GRID_NORTH_POLE_LONGITUDE
+
 
 def plot_spatial(sample, ax, title, **kwargs):
     
@@ -96,11 +102,11 @@ def plot_power_spectrum(img, ax, label=None, save_fig=False):
     Abins *= np.pi * (kbins[1:]**2 - kbins[:-1]**2)
 
     ax.loglog(kvals, Abins, label=label)
-    ax.set_xlabel("$k$")
-    ax.set_ylabel("$P(k)$")
+    ax.set_xlabel("Wavelength (km)", fontsize=13)
+    ax.set_ylabel("Power (db)", fontsize=13)
     if label:
         ax.legend()
-    plt.tight_layout()
+    # plt.tight_layout()
 
     if save_fig:
         timestr = time.strftime("%Y%m%d-%H%M")
@@ -112,23 +118,6 @@ def spatial_rmse(y_hat, y):
 def spatial_bias(y_hat, y):
     return y_hat.mean() - y.mean()
 
-def plot_residual_and_power_spectrum(residual, target, prediction, **kwargs):
-
-    fig, axes = plt.subplots(1, 2, figsize=(16, 5))
-
-    im_residual = plot_spatial(residual, axes[0], "Residual", **kwargs.get('plot_residual_kwargs', {}))
-    fig.colorbar(im_residual, ax=axes[0], orientation='horizontal', fraction=0.05, aspect=32)
-    
-    plot_power_spectrum(target, ax=axes[1], label='Target')
-    plot_power_spectrum(prediction, ax=axes[1], label='AI Model')
-    
-    axes[1].set_title("Power Spectrum")
-    axes[1].legend(['Target', 'AI Model'], fontsize=12)
-    axes[1].set_xlabel("Frequency")
-    axes[1].set_ylabel("Power")
-    axes[1].tick_params(labelsize=8)
-    
-    plt.show()
 
 def plot_sample(data):
 
@@ -174,17 +163,229 @@ def plot_loss(train_loss, val_loss):
     plt.legend(fontsize=10)
     plt.show()
 
-def plot_eccc_results(samples, samples_id, title, cbar_title, **kwargs):
+
+def plot_with_bbox(ax, data, rotated_crs, bounding_boxes, rlat, rlon, cmap='coolwarm', vmin=-10, vmax=10):
+    mesh = ax.pcolormesh(rlon, rlat, data, cmap=cmap, transform=rotated_crs, vmin=vmin, vmax=vmax)
     
-    fig, axes = plt.subplots(1, len(samples), figsize=(18, 4))
-    plt.suptitle(title, fontsize=15)
+    ax.coastlines()
+    ax.add_feature(cfeature.BORDERS, linestyle=':')
+    ax.gridlines(draw_labels=True)
     
-    for i, ax in enumerate(axes):
-        im = plot_spatial(samples[i], ax, samples_id[i], **kwargs)
+    rotated_crs = ccrs.RotatedPole(
+        pole_latitude=GRID_NORTH_POLE_LATITUDE,
+        pole_longitude=GRID_NORTH_POLE_LONGITUDE
+    )
     
-    cbar_ax = fig.add_axes([0.2, 0.05, 0.6, 0.05])  # [left, bottom, width, height]
-    cbar = fig.colorbar(im, cax=cbar_ax, orientation='horizontal') 
-    cbar.set_label(cbar_title)  
-    cbar.ax.tick_params()  
+    geographic_crs = ccrs.PlateCarree()
+
+    for name, (lon_min, lon_max, lat_min, lat_max) in bounding_boxes.items():
+        lon_points = np.array([lon_min, lon_max, lon_max, lon_min])
+        lat_points = np.array([lat_min, lat_min, lat_max, lat_max])
+
+        rotated_points = rotated_crs.transform_points(geographic_crs, lon_points, lat_points)
+        rotated_lon = rotated_points[:, 0]
+        rotated_lat = rotated_points[:, 1]
+
+        lon_min, lon_max = rotated_lon.min(), rotated_lon.max()
+        lat_min, lat_max = rotated_lat.min(), rotated_lat.max()
+        
+        box_lon = [lon_min, lon_max, lon_max, lon_min, lon_min]
+        box_lat = [lat_min, lat_min, lat_max, lat_max, lat_min]
+        ax.plot(box_lon, box_lat, linestyle="--", color="black", label=name)
+
+        text_x = (lon_min + lon_max) / 2
+        if name == 'Prairies (Alberta)':
+            text_y = lat_min - 1.1  # offset below the box
+        else:
+            text_y = lat_max + 0.2  # offset above the box
+        ax.text(
+            text_x, text_y, name,
+            transform=rotated_crs,
+            horizontalalignment='center',
+            verticalalignment='bottom',
+            fontsize=8,
+            bbox=dict(facecolor='white', alpha=0.6, edgecolor='none', pad=1)
+        )
+    return mesh
+
+def plot_power_spectrum_with_rapsd(img, ax, label=None, save_fig=False, fs=1/2.5):
+    spectrum, k = rapsd(img, fft_method = np.fft, return_freq=True, d=1/fs, normalize=False)
+
+    spectrum_db = 10 * np.log10(spectrum + 1e-10)  # add epsilon to avoid log(0)
+
+    ax.plot(k, spectrum_db, label=label)
+    ax.set_xscale('log', base=2)
+    ax.set_yscale('linear')
+    ax.set_xlabel("Wavelength (pixels)", fontsize=13)
+    ax.set_ylabel("Power (dB)", fontsize=13)
+
+    if label:
+        ax.legend()
+
+    if save_fig:
+        timestr = time.strftime("%Y%m%d-%H%M")
+        plt.savefig(f'power_spectrum_rapsd_{timestr}.png', dpi=300, bbox_inches='tight')
+
+def crop_region(data, rlon, rlat, lon_min, lon_max, lat_min, lat_max):
+    rlon2d, rlat2d = np.meshgrid(rlon, rlat)
+
+    mask = (
+        (rlon2d >= lon_min) & (rlon2d <= lon_max) &
+        (rlat2d >= lat_min) & (rlat2d <= lat_max)
+    )
+
+    rows = np.any(mask, axis=1)
+    cols = np.any(mask, axis=0)
+
+    row_min, row_max = np.where(rows)[0][[0, -1]]
+    col_min, col_max = np.where(cols)[0][[0, -1]]
+
+    # add 1 to max indices to include the boundary
+    return (
+        data[row_min:row_max+1, col_min:col_max+1],
+        rlon2d[row_min:row_max+1, col_min:col_max+1],
+        rlat2d[row_min:row_max+1, col_min:col_max+1]
+    )
+
+def convert_bbox_to_rotated(lon_min, lon_max, lat_min, lat_max, rotated_crs):
+    geographic_crs = ccrs.PlateCarree()
+    lon = np.array([lon_min, lon_max, lon_max, lon_min])
+    lat = np.array([lat_min, lat_min, lat_max, lat_max])
+    transformed = rotated_crs.transform_points(geographic_crs, lon, lat)
+    rlon = transformed[:, 0]
+    rlat = transformed[:, 1]
+    return rlon.min(), rlon.max(), rlat.min(), rlat.max()
+
+
+def plot_maps(plot_input, plot_pred, plot_target, regions, rotated_crs):
+    fig, axes = plt.subplots(2, 2, figsize=(18, 11), subplot_kw={'projection': rotated_crs})
+
+    im1 = plot_with_bbox(
+        axes[0, 0], plot_input, rotated_crs, bounding_boxes=regions,
+        rlat=RLAT_GDPS, rlon=RLON_GDPS,
+    )
+    axes[0, 0].set_title("GDPS", fontsize=18)
+    axes[0, 0].axis('off')
+
+    im2 = plot_with_bbox(
+        axes[0, 1], plot_pred, rotated_crs, bounding_boxes=regions,
+        rlat=RLAT_HRDPS, rlon=RLON_HRDPS,
+    )
+    axes[0, 1].set_title("GDPS Downscaled", fontsize=18)
+    axes[0, 1].axis('off')
+
+    im3 = plot_with_bbox(
+        axes[1, 0], plot_target, rotated_crs, bounding_boxes=regions,
+        rlat=RLAT_HRDPS, rlon=RLON_HRDPS,
+    )
+    axes[1, 0].set_title("HRDPS", fontsize=18)
+    axes[1, 0].axis('off')
+    fig.delaxes(axes[1, 1]) 
+    axes[1, 1] = fig.add_subplot(2, 2, 4) 
+
+    plot_power_spectrum_with_rapsd(plot_pred, axes[1, 1], label="GDPS Downscaled")
+    plot_power_spectrum_with_rapsd(plot_target, axes[1, 1], label="HRDPS")
+
+    axes[1, 1].set_title("Power Spectrum", fontsize=18)
+
+    cbar = fig.colorbar(
+        im1,
+        ax=axes.ravel().tolist(),
+        orientation='horizontal',
+        pad=0.08,         
+        aspect=60,        
+        shrink=0.9,     
+        location='bottom',
+        label='[m/s]'
+    )
+    cbar.ax.tick_params(labelsize=11)
+    plt.show()
+
+def plot_by_region(plot_input, plot_pred, plot_target, regions, rotated_crs):
+    n_regions = len(regions)
+    
+    fig, axes = plt.subplots(n_regions, n_regions, figsize=(22, 20), subplot_kw={'projection': rotated_crs})
+
+    for col in range(n_regions):
+        axes[n_regions-1, col] = fig.add_subplot(n_regions, n_regions, n_regions*(n_regions-1) + col + 1)  # replace with non-map axes
+
+    datasets = [
+        (plot_input, RLON_GDPS, RLAT_GDPS, "GDPS"),
+        (plot_pred, RLON_HRDPS, RLAT_HRDPS, "GDPS Downscaled"),
+        (plot_target, RLON_HRDPS, RLAT_HRDPS, "HRDPS")
+    ]
+
+    for col, (region_name, (lon_min, lon_max, lat_min, lat_max)) in enumerate(regions.items()):
+        rlon_min, rlon_max, rlat_min, rlat_max = convert_bbox_to_rotated(
+            lon_min, lon_max, lat_min, lat_max, rotated_crs
+        )
+
+        cropped_maps = []  
+
+        for row, (data, rlon, rlat, title) in enumerate(datasets):
+            ax = axes[row, col]
+
+            try:
+                cropped_data, cropped_rlon, cropped_rlat = crop_region(
+                    data, rlon, rlat, rlon_min, rlon_max, rlat_min, rlat_max
+                )
+                cropped_maps.append((cropped_data, title))
+                pcm = ax.pcolormesh(cropped_rlon, cropped_rlat, cropped_data,
+                                    cmap='coolwarm', transform=rotated_crs, vmin=-10, vmax=10)
+
+                ax.coastlines()
+                ax.add_feature(cfeature.BORDERS, linestyle=':')
+
+                gl = ax.gridlines(draw_labels=True, linewidth=0.3, color='gray', alpha=0.6, linestyle='--')
+                gl.top_labels = False
+                gl.right_labels = False
+                gl.xlabel_style = {'size': 9}
+                gl.ylabel_style = {'size': 9}
+            except Exception as e:
+                print(f"Skipping region '{region_name}' for dataset '{title}': {e}")
+                ax.set_visible(False)
+                continue
+
+            if row == 0:
+                ax.set_title(region_name, fontsize=16, pad=10)
+            if col == 0:
+                ax.text(-0.2, 0.5, title, va='center', ha='right', rotation='vertical',
+                        fontsize=16, transform=ax.transAxes)
+
+        # power spectra (row 3)
+        ax_psd = axes[3, col]
+        for data_cropped, label in cropped_maps:
+            if label != 'GDPS':
+                plot_power_spectrum_with_rapsd(data_cropped, ax_psd, label=label)
+        ax_psd.set_title(f"Power Spectrum", fontsize=16)
+
+    # cbar_ax = fig.add_axes([0.92, 0.25, 0.015, 0.55])
+    # fig.colorbar(pcm, cax=cbar_ax, label='[m/s]')
 
     plt.show()
+
+def plot_eccc_results(plot_input, plot_pred, plot_target):
+    # define bounding boxes for each region
+    regions = {
+        "Mountains (BC)": (-116 - 5.88/2,
+                            -116 + 5.88/2, 
+                            52 - 3.6/2, 
+                            52 + 3.6/2),  # Centered at (116ºW, 52ºN)
+        "Prairies (Alberta)": (-110 - 5.88/2, 
+                                -110 + 5.88/2, 
+                                52 - 3.6/2, 
+                                52 + 3.6/2),  # Centered at (110ºW, 52ºN)
+        "Lakes (Ontario)": (-78 - 5.12/2, 
+                            -78 +  5.12/2, 
+                            45.5 - 3.6/2, 
+                            45.5 + 3.6/2),  # Centered at (78ºW, 45.5ºN)
+        "Oceans (Atlantic)": (-60 - 4.82/2, 
+                                -60 + 4.82/22, 
+                                42 - 3.6/2, 
+                                42 + 3.6/2)  # Centered at (60ºW, 42ºN)
+    }
+    rotated_crs = ccrs.RotatedPole(pole_latitude=GRID_NORTH_POLE_LATITUDE, pole_longitude=GRID_NORTH_POLE_LONGITUDE)
+
+    plot_maps(plot_input, plot_pred, plot_target, regions, rotated_crs)
+    plot_by_region(plot_input, plot_pred, plot_target, regions, rotated_crs)
+    
