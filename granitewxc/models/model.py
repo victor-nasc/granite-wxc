@@ -16,15 +16,17 @@ def get_scalers(config: ExperimentConfig):
     """    
 
     # Input and target scalers
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
     if config.data.type == 'eccc':
-        input_mu = torch.load(config.model.input_mu)
-        input_sigma = torch.load(config.model.input_sigma)
-        input_static_mu = torch.load(config.model.input_static_mu)
-        input_static_sigma = torch.load(config.model.input_static_sigma)
-        target_mu = torch.load(config.model.target_mu)
-        target_sigma = torch.load(config.model.target_sigma)
-        target_static_mu = torch.load(config.model.target_static_mu)
-        target_static_sigma = torch.load(config.model.target_static_sigma)
+        input_mu = torch.load(config.model.input_mu, map_location=device)
+        input_sigma = torch.load(config.model.input_sigma, map_location=device)
+        input_static_mu = torch.load(config.model.input_static_mu, map_location=device)
+        input_static_sigma = torch.load(config.model.input_static_sigma, map_location=device)
+        target_mu = torch.load(config.model.target_mu, map_location=device)
+        target_sigma = torch.load(config.model.target_sigma, map_location=device)
+        target_static_mu = torch.load(config.model.target_static_mu, map_location=device)
+        target_static_sigma = torch.load(config.model.target_static_sigma, map_location=device)
         
     else:
         raise ValueError(f'{config.data.type} is not a valid config.data.type')
