@@ -48,8 +48,6 @@ The notebooks walk through the full pipeline using a single GDPS-HRDPS data pair
 
 The objective is to downscale GDPS outputs by a factor of 8 to match the spatial resolution of HRDPS using the **Prithvi Weather Foundation Model**. The following data pipeline is used for preprocessing.
 
----
-
 ## Data Pipeline
 
 - **Regridding**: GDPS and HRDPS are provided in different rotated coordinate systems. We regrid GDPS to match the HRDPS grid using nearest-neighbor interpolation.
@@ -58,13 +56,9 @@ The objective is to downscale GDPS outputs by a factor of 8 to match the spatial
 - **Data Sampling**: Each GDPS-HRDPS pair is large (~1.5 GB), so we sample random spatial crops to form an intermediate dataset for training.
 - **Static Covariates**: Static features (e.g., orography, roughness) are used to aid model learning.
 
----
-
 ## Model
 
 We use a UNet architecture, integrating the **Prithvi encoder** as a deep feature extractor.
-
----
 
 ##  Files provided for running the example notebooks
 
@@ -78,14 +72,39 @@ We provide:
 - **Indices**: JSON files mapping file paths for input/target data pairs.
 - **Pretrained weights**: A model checkpoints.
 
+---
+
 # Step-by-step guide to setup the enviroment for running the notebooks
+
+## Setup Virtual Enviroment
+
+Python >= 3.10 is required
+
+Using Conda
+```
+conda create -n granitewxc python=3.10
+conda activate granitewxc
+```
+
+Using venv
+```
+python3.10 -m venv granitewxc
+source granitewxc/bin/activate
+```
+
+Using uv
+```bash
+uv venv .granitewxc --python=python3.10
+source .granitewxc/bin/activate
+```
+
+Note: When installing packages, use `uv pip install` instead of `pip install`
+
+
 ## Clone this repository and the Pritvhi weather foundation model:
 ```bash
-git clone https://github.com/NASA-IMPACT/Prithvi-WxC
 git clone https://github.com/IBM/granite-wxc.git
-cd Prithvi-WxC
-pip install '.[examples]'
-cd ../granite-wxc
+cd granite-wxc/
 pip install '.[examples]'
 ```
 ## Clone Hugging Face Repository
@@ -94,24 +113,6 @@ pip install '.[examples]'
 cd granite-wxc/
 git clone https://huggingface.co/ibm-granite/granite-geospatial-wxc-downscaling
 ```
-
-## Setup Virtual Enviroment
-Using uv
-```bash
-uv venv .venv --python=python3.10
-source .venv/bin/activate
-```
-
-Using Conda
-```
-conda create -n myenv python=3.10
-```
-
-Using venv
-```
-python3.10 -m venv .venv
-```
-
 
 ## Launch Jupyter Lab
 
@@ -130,8 +131,6 @@ The Hugging Face repository includes only a sample. In case you want to experime
 
 Before training, you must regrid the GDPS data to match the HRDPS domain.
 
----
-
 ### Data Preprocessing
 
 Use `preprocess.py` to interpolate GDPS onto the HRDPS grid using nearest-neighbor interpolation. The regridded data is then downsampled by a factor of 8.
@@ -141,9 +140,6 @@ Use `preprocess.py` to interpolate GDPS onto the HRDPS grid using nearest-neighb
 
 
 > ***Obs***: Once regridding is complete, the GDPS data matches the HRDPS resolution. The Dataset class then handles downsampling automatically by a factor of eight, see the implementation in [eccc.py](https://github.com/victor-nasc/granite-wxc/blob/main/granitewxc/datasets/eccc.py)
-
-
----
 
 ### Index Files
 
@@ -166,8 +162,6 @@ You must define index files in JSON format for both input and static data.
   "static_hrdps": "<Static_HRDPS_file.nc>"
 }
 ```
-
----
 
 ### Scaler Computation
 
