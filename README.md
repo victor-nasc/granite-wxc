@@ -3,14 +3,14 @@
 This repository contains code and examples to apply the [Prithvi WxC foundation model](https://github.com/NASA-IMPACT/Prithvi-WxC) to downscaling tasks. In particular, the repository contains both code and instructions for generic fine-tuning tasks as well as fine-tuned models for MERRA2 2m temperature and the ECCC v10 and u10 wind components as reference.
 
 <p align="center">
-   <img src="downscaling_T2M_coolwarm_animated.gif" alt="6x downscaling of MERRA-2 2m temperature" width="60%"/>
+   <img src="downscaling_T2M_coolwarm_animated.gif" alt="6x downscaling of MERRA-2 2m temperature" width="70%"/>
    <br><em>Figure 1: 6x downscaling of MERRA-2 2m temperature</em>
 </p>
 
 </br>
 
 <p align="center">
-   <img src="downscaling_eccc_u10.png" alt="8x downscaling of ECCC's u10 wind" width="60%"/>
+   <img src="downscaling_eccc_u10.png" alt="8x downscaling of ECCC's u10 wind" width="70%"/>
    <br><em>Figure 2: 8x downscaling of ECCC's u10 wind component</em>
 </p>
 
@@ -30,8 +30,10 @@ This repository contains code and examples to apply the [Prithvi WxC foundation 
    - [MERRA2 example](examples/merra2_downscaling/notebooks/merra2_downscaling_inference.ipynb):
       This notebook will download model weights as well as sample data for basic illustration from [Hugging Face](https://huggingface.co/ibm-granite/granite-geospatial-wxc-downscaling).
    - [ECCC example](examples/eccc_downscaling/):
-         This directory contains notebooks for both fine-tuning and inference. It also includes instructions on setting up the data and configuration files.
+         This directory contains notebooks for both fine-tuning and inference. It also includes instructions for downloading and setting up the data, model and the required files from [Hugging Face](https://huggingface.co/ibm-granite/granite-geospatial-wxc-downscaling/tree/main/ECCC).
 
 ## Fine-tuned model
 
 The fine-tuned model for MERRA-2 2m temperature data is available via [Hugging Face](https://huggingface.co/ibm-granite/granite-geospatial-wxc-downscaling). For an application to EURO-CORDEX data please refer to the paper.
+
+The fine-tuned model for ECCC v10 and u10 wind component data is available via [Hugging Face](https://huggingface.co/ibm-granite/granite-geospatial-wxc-downscaling/tree/main/ECCC).
