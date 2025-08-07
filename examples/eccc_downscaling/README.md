@@ -22,10 +22,14 @@ The notebooks walk through the full pipeline using a single GDPS-HRDPS data pair
 | U<sub>surf</sub> | Zonal wind at surface (10 m)                                 | m/s    |
 | V<sub>surf</sub> | Meridional wind at surface (10 m)                            | m/s    |
 | T<sub>surf</sub> | Air temperature at surface (1.5 m)                           | °C     |
-| T<sub>546</sub>  | Air temperature at 546 hPa (interpolated)                    | °C     |
-| U<sub>546</sub>  | Zonal wind at 546 hPa                                        | m/s    |
-| V<sub>546</sub>  | Meridional wind at 546 hPa                                   | m/s    |
-| W<sub>546</sub>  | Vertical motion at 546 hPa (interpolated)                    | Pa/s   |
+| U<sub>{500.0, 700.0, 850.0, 925.0, 1000.0}</sub>  | Zonal wind at {500.0, 700.0, 850.0, 925.0, 1000.0} hPa                                        | m/s    |
+| V<sub>{500.0, 700.0, 850.0, 925.0, 1000.0}</sub>  | Meridional wind at {500.0, 700.0, 850.0, 925.0, 1000.0} hPa                                   | m/s    |
+| T<sub>{500.0, 700.0, 850.0, 925.0, 1000.0}</sub>  | Air temperature at {500.0, 700.0, 850.0, 925.0, 1000.0} hPa                     | °C     |
+| W<sub>{500.0, 700.0, 850.0, 925.0, 1000.0}</sub>  | Vertical motion at {500.0, 700.0, 850.0, 925.0, 1000.0} hPa                     | Pa/s   |
+| HU<sub>{500.0, 700.0, 850.0, 925.0, 1000.0}</sub>  | Specific_humidity at {500.0, 700.0, 850.0, 925.0, 1000.0} hPa                     | Kg/Kg   |
+| GZ<sub>{500.0, 700.0, 850.0, 925.0, 1000.0}</sub>  | Geopotential height at {500.0, 700.0, 850.0, 925.0, 1000.0} hPa                     | Dam   |
+
+
 
 ### HRDPS Targets
 
