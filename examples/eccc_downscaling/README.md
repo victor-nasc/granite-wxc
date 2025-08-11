@@ -130,10 +130,9 @@ jupyter lab --no-browser --ip $(hostname -f)
 The Hugging Face repository includes only a sample. In case you want to experiment with the full dataset, you can download the datasets from the following links:
 
 - **HRDPS**: [Download](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/hrdps/)
-- **GDPS**: [Download](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/gdps_regridded/)
+- **GDPS Regridded**: [Download](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/gdps_regridded/)
 - **Static data**: [Download](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/geophy.nc)
 
-Before training, you must regrid the GDPS data to match the HRDPS domain.
 
 ### Data Preprocessing
 
