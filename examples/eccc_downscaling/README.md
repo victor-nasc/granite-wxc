@@ -131,7 +131,8 @@ The Hugging Face repository includes only a sample. In case you want to experime
 
 - **HRDPS**: [Download](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/hrdps/)
 - **GDPS Regridded**: [Download](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/gdps_regridded/)
-- **Static data**: [Download](https://hpfx.collab.science.gc.ca/~snow000/hrdps_domain/geophy.nc)
+- **GDPS Static data**: [Download - GDPS static](https://huggingface.co/ibm-granite/granite-geospatial-wxc-downscaling/blob/main/ECCC/data_sample/gdps_regridded/static_regridded_gdps.nc)
+- **HRDPS Static data**:[Download - HRDPS static](https://huggingface.co/ibm-granite/granite-geospatial-wxc-downscaling/blob/main/ECCC/data_sample/hrdps/static_hrdps.nc)
 
 
 ### Data Preprocessing
