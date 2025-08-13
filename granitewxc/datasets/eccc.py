@@ -57,7 +57,7 @@ class EcccHrdpsGdpsDataset(Dataset):
         if not self.test:
             
             # get one image per epoch
-            self.id_key = np.random.randint(0, len(self.data_index_repo)) # <- pick one pair randomly from the training data
+            self.id_key = np.random.randint(0, len(self.data_index_repo)) 
     
             gdps_input, hrdps_input = self.__read_gdps_hrdps__(self.id_key)
     
