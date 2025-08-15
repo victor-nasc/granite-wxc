@@ -105,7 +105,7 @@ source .granitewxc/bin/activate
 Note: When installing packages, use `uv pip install` instead of `pip install`
 
 
-## Clone this repository and the Pritvhi weather foundation model:
+## Clone this repository:
 ```bash
 git clone https://github.com/IBM/granite-wxc.git
 cd granite-wxc/
